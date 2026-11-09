@@ -38,17 +38,18 @@ the idea rather than the exact wiring.
 
 The "something that thinks" is your choice. There are two options and you pick one during setup.
 
-**Gemini** is what I run. It's Google's Live API: you paste a free key and it works in a couple of
-minutes, and it sounds good. The catch is that your microphone audio, and anything Jarvis reads out
-for the model (command output, the notes about you, what you asked it to remember), goes to Google,
-and free keys may be used to train their models. I use it for things I'd be fine saying out loud
-in a café.
+**Local** is the one I'd rather you run. Everything stays on your machine: Whisper for listening, a
+model running in [Ollama](https://ollama.com) for thinking, Piper for the voice. Nothing leaves, so you can
+leave it running without wondering who's listening. The cost is RAM, and a GPU helps. A small model like
+`llama3.2:3b` is fine with a few gigabytes, bigger ones want more. I'll be straight about it: I wrote it
+and it has unit tests, but I haven't run it on my own computer yet, because I use Gemini. If you try it
+and something breaks, please open an issue with the output of `jarvis doctor`.
 
-**Local** keeps everything on your machine: Whisper for listening, a model running in
-[Ollama](https://ollama.com) for thinking, Piper for the voice. Nothing leaves. If you're going to use
-this for real work, use this one. I'll be straight about it: I wrote it and it has unit tests, but I
-haven't run it on my own computer, because I use Gemini. If you try it and something breaks, please open
-an issue with the output of `jarvis doctor`.
+**Gemini** is just an option, for when you want to try Jarvis out and your machine doesn't have the RAM
+for a local model. It's Google's Live API: paste a free key and it works in a couple of minutes, and it
+sounds good. It's what I run today. The catch is that your microphone audio, and anything Jarvis reads out
+for the model (command output, the notes about you, what you asked it to remember), goes to Google, and
+free keys may be used to train their models. Use it for things you'd be fine saying out loud in a café.
 
 ## Install
 
@@ -58,13 +59,14 @@ and PipeWire or PulseAudio for sound.
 ```bash
 git clone https://github.com/khalilammarr/jarvis-voice
 cd jarvis-voice
-uv sync --extra gemini        # or --extra local, or --all-extras
+uv sync --extra local         # the private one. Or --extra gemini to just try it
 uv run jarvis setup           # a few questions, see below
 uv run jarvis doctor          # checks your install and tells you how to fix what's missing
 uv run jarvis                 # then just talk
 ```
 
-For the local brain, also run an Ollama server with a model that can call tools:
+For the local brain, also run an Ollama server with a model that can call tools. (For Gemini you skip
+this and paste a free key during setup.)
 
 ```bash
 ollama pull llama3.2:3b

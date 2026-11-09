@@ -32,7 +32,7 @@ listens for standard Arabic and speaks with an Arabic Piper voice, so expect it 
 detection is energy-based, so a very noisy room may need a headset. No streaming speech-to-text:
 Jarvis waits for you to finish a sentence (about 0.6 s of silence), then transcribes it.
 
-## Gemini API (testing only)
+## Gemini API (for testing, or if you lack the RAM for a local model)
 
 Uses the Gemini Live API for speech in, thinking and speech out in one connection. Quick to start
 and sounds natural, but **your microphone audio, and anything Jarvis reads for the model (command
