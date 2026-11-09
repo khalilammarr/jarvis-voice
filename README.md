@@ -29,12 +29,12 @@ you want something stable, pin a commit; if you pull the latest, skim the commit
 
 You talk, it listens, something thinks, it talks back and presses the buttons.
 
-```
-mic -> speech to text -> a language model -> text to speech -> speaker
-                              |
-              tools: run commands, open apps, play music,
-                     type for you, remember things
-```
+<p align="center">
+  <img src="docs/how-it-works.svg" alt="You speak, Jarvis listens, thinks, speaks back, and can use tools" width="100%">
+</p>
+
+With Gemini, listening, thinking and speaking all happen in one connection to Google, so the picture is
+the idea rather than the exact wiring.
 
 The "something that thinks" is your choice. There are two options and you pick one during setup.
 
