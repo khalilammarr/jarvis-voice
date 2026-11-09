@@ -9,7 +9,7 @@ import time
 
 from jarvis.backends.local.errors import LocalBackendError
 from jarvis.backends.local.speech import SentenceSplitter
-from jarvis.languages import AUTO
+from jarvis.languages import stt_code_for
 from jarvis.prompt import Context, system_instruction
 from jarvis.tools import openai_tools
 
@@ -31,7 +31,7 @@ class LocalConversation:
         self._rt, self._cfg = runtime, cfg
         self._mic, self._speaker, self._tools, self._transcript = mic, speaker, tools, transcript
         self._context, self._opening = context, opening
-        self._language = None if cfg.language == AUTO else cfg.language
+        self._language = stt_code_for(cfg.language)
         self._history: list[dict] = []
         self._turn: asyncio.Task | None = None
         self._endpointer = None

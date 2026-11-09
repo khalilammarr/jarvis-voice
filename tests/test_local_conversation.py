@@ -247,3 +247,9 @@ async def test_barge_in_flushes_speech_and_cancels_the_reply():
     task.cancel()
     await asyncio.gather(task, return_exceptions=True)
     assert speaker.flushed >= 1 and "never." not in rt.tts.said
+
+
+async def test_whisper_gets_the_base_language_code_for_a_dialect():
+    convo, mic, *_rest, rt, _ = build([["ok."]], cfg=_cfg(language="ar-tn"))
+    await run_until(convo, mic)
+    assert rt.stt.languages == ["ar"]

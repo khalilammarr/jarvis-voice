@@ -73,10 +73,11 @@ ollama pull llama3.2:3b
 ### Setup
 
 `jarvis setup` asks which brain to use, which language Jarvis should speak (auto, English, French,
-Arabic, Spanish, German, Italian, Portuguese, Dutch, Russian, Turkish or Chinese), what personality it
+Arabic, Tunisian Arabic, Spanish, German, Italian, Portuguese, Dutch, Russian, Turkish or Chinese), what personality it
 should have (casual with a bit of banter, friendly, or short and to the point), which voice, and whether
 to wait for a wake word or just listen. It writes `~/.config/jarvis/config.toml`. Run it again whenever
-you change your mind. If you use Gemini, `jarvis --voices` plays every voice so you can pick one.
+you change your mind. Tunisian (Derja) works best with Gemini: it answers in the dialect, French
+words and all. The local backend has no Tunisian speech models, so there it falls back to standard Arabic. If you use Gemini, `jarvis --voices` plays every voice so you can pick one.
 
 ## Typing for you
 
@@ -116,7 +117,7 @@ get to them. The list will change.
 - [x] Run commands, open apps, play music, control what's playing
 - [x] Type for you, into whatever window has focus
 - [x] Memory: it remembers what you tell it, in a plain text file you can edit
-- [x] Daily briefing, three personalities, 12 languages, a setup wizard, `jarvis doctor`
+- [x] Daily briefing, three personalities, 13 languages, a setup wizard, `jarvis doctor`
 - [ ] A fully local brain. The code is written and tested with fake models, but it hasn't run on real
   hardware yet, so I'm not ticking it.
 

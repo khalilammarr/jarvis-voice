@@ -7,7 +7,7 @@ import os
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 
-from jarvis.languages import AUTO, language_name
+from jarvis.languages import AUTO, hint_for, language_name
 
 # A late-night session at 1 a.m. still belongs to "yesterday" for the morning briefing.
 DAY_ROLLOVER = timedelta(hours=4)
@@ -146,7 +146,7 @@ def system_instruction(google_search: bool, user: str | None = None, context: Co
     cloud = backend == "gemini"
     speak = ("Reply in whatever language the user speaks." if language == AUTO else
              f"Always speak {language_name(language)}, even if the user mixes in other languages, "
-             "unless they ask you to switch.")
+             "unless they ask you to switch. " + hint_for(language)).strip()
     text = (_PERSONAS[persona].format(user=name, machine=_machine(desktop))
             + _VOICE_STYLE.format(language=speak)
             + _TOOLS.format(user=name,

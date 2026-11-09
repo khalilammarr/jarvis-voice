@@ -25,6 +25,9 @@ GPUs it uses CUDA automatically; otherwise it runs int8 on the CPU. Models downl
 `~/.local/share/jarvis/voices/`. Override with `tts_voice`. Browse voices in the
 [Piper voice list](https://huggingface.co/rhasspy/piper-voices).
 
+**Tunisian Arabic.** There is no Whisper or Piper model for the Derja dialect. With `language = "ar-tn"` the local backend
+listens for standard Arabic and speaks with an Arabic Piper voice, so expect it to sound off. Use Gemini for Derja.
+
 **Limits.** No web search (nothing is allowed out), so the daily briefing has no weather. Speech
 detection is energy-based, so a very noisy room may need a headset. No streaming speech-to-text:
 Jarvis waits for you to finish a sentence (about 0.6 s of silence), then transcribes it.

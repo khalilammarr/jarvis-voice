@@ -7,7 +7,7 @@ See [`config.example.toml`](../config.example.toml) for a commented file.
 | config.toml | Environment variable | Default | Meaning |
 |---|---|---|---|
 | `general.backend` | `JARVIS_BACKEND` | none (asked by `jarvis setup`) | `local` or `gemini` |
-| `general.language` | `JARVIS_LANGUAGE` | `auto` | `auto en fr ar es de it pt nl ru tr zh` |
+| `general.language` | `JARVIS_LANGUAGE` | `auto` | `auto en fr ar ar-tn es de it pt nl ru tr zh` (`ar-tn` is Tunisian Arabic) |
 | `general.persona` | `JARVIS_PERSONA` | `sidekick` | `sidekick friendly concise` |
 | `general.wake_word` | `JARVIS_WAKE_WORD` | `false` | say "hey jarvis" first (needs `--extra wakeword`) |
 | `general.briefing` | `JARVIS_BRIEFING` | `true` | briefing on the first conversation each day (4 a.m. rollover) |

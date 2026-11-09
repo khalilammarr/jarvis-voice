@@ -110,3 +110,12 @@ def test_catalogue_is_consistent():
     assert language_name("fr") == "French" and language_name("auto") == "the language the user speaks"
     assert local_voice_for("fr").startswith("fr_") and local_voice_for("auto") == local_voice_for("en")
     assert {"sidekick", "friendly", "concise"} <= set(PERSONAS)
+
+
+def test_tunisian_arabic_is_a_language_with_its_own_speech_and_prompt_settings(tmp_path):
+    from jarvis.languages import hint_for, stt_code_for
+    cfg = _load(tmp_path, '[general]\nlanguage = "ar-tn"\n')
+    assert cfg.language == "ar-tn"
+    assert language_name("ar-tn").startswith("Tunisian")
+    assert stt_code_for("ar-tn") == "ar" and stt_code_for("fr") == "fr" and stt_code_for("auto") is None
+    assert "Derja" in hint_for("ar-tn") and "French" in hint_for("ar-tn") and hint_for("fr") == ""

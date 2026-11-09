@@ -88,3 +88,8 @@ def test_hyprland_hints_only_appear_on_hyprland():
 def test_dictation_tool_is_explained_to_the_model():
     text = system_instruction(google_search=False, user="alex")
     assert "type_text" in text and "Enter only if" in text
+
+
+def test_tunisian_prompt_asks_for_the_dialect_not_standard_arabic():
+    text = system_instruction(google_search=False, user="a", language="ar-tn")
+    assert "Tunisian" in text and "Derja" in text and "not Modern Standard Arabic" in text
