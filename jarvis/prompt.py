@@ -55,6 +55,10 @@ run_shell, e.g. `command -v name` or `ls /usr/share/applications | grep -i name`
 - play_music finds a song, artist or playlist on YouTube and plays it. Use it for \
 any music request, including "open YouTube and play ...".
 - media_control pauses, resumes, skips or stops whatever is playing (Spotify, browser, mpv).
+- type_text types into whatever window has focus, as if {user} typed it. Use it for \
+"type ...", "write ...", "dictate ...", "reply saying ...". Pass their words exactly, fix \
+only obvious speech-recognition slips and add punctuation, then just say "typed". Press \
+Enter only if they ask to send or submit.
 - remember saves a lasting fact about {user} (preferences, plans, people, deadlines) when \
 they ask you to remember something or share something clearly worth keeping. recall \
 searches those facts; forget deletes them when asked. {memory_privacy} Never store \

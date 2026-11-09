@@ -20,6 +20,16 @@ log = logging.getLogger(__name__)
 
 MEDIA_ACTIONS = ("play", "pause", "play-pause", "next", "previous", "stop", "status")
 MAX_SHELL_TIMEOUT_S = 300.0
+TYPE_MAX_CHARS = 2_000
+
+# (builds the argv that types a string, argv that presses Enter) per typing tool.
+# The text is always its own argv element after "--", so it is never parsed by a shell.
+_TYPERS = {
+    "wtype": (lambda text: ["wtype", "--", text], ["wtype", "-k", "Return"]),
+    "xdotool": (lambda text: ["xdotool", "type", "--clearmodifiers", "--delay", "8", "--", text],
+                ["xdotool", "key", "Return"]),
+    "ydotool": (lambda text: ["ydotool", "type", "--", text], ["ydotool", "key", "28:1", "28:0"]),
+}
 
 DECLARATIONS: tuple[dict, ...] = (
     {
@@ -99,6 +109,22 @@ DECLARATIONS: tuple[dict, ...] = (
             "type": "OBJECT",
             "properties": {"query": {"type": "STRING", "description": "Text identifying the fact(s)."}},
             "required": ["query"],
+        },
+    },
+    {
+        "name": "type_text",
+        "description": "Type text into whatever window currently has keyboard focus, as if the user "
+                       "typed it (dictation). Use it when the user asks you to type, write or dictate "
+                       "something for them. Pass their words exactly, without commentary.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "text": {"type": "STRING", "description": "Exactly the text to type."},
+                "press_enter": {"type": "BOOLEAN",
+                                "description": "Press Enter after typing. Only when the user asks "
+                                               "to send or submit. Default false."},
+            },
+            "required": ["text"],
         },
     },
     {
@@ -206,6 +232,7 @@ class ToolRunner:
             "remember": self.remember,
             "recall": self.recall,
             "forget": self.forget,
+            "type_text": self.type_text,
         }
 
     async def call(self, name: str, args: dict | None) -> dict:
@@ -232,6 +259,35 @@ class ToolRunner:
 
     def forget(self, query: str) -> dict:
         return self._memory.forget(query) if self._memory else self._NO_MEMORY
+
+    @staticmethod
+    def _typing_tool() -> str | None:
+        """wtype on Wayland, xdotool on X11, ydotool (works on both) as the fallback."""
+        wayland = os.environ.get("XDG_SESSION_TYPE", "").lower() == "wayland" or bool(os.environ.get("WAYLAND_DISPLAY"))
+        preferred = ("wtype", "ydotool", "xdotool") if wayland else ("xdotool", "ydotool", "wtype")
+        return next((name for name in preferred if shutil.which(name)), None)
+
+    def type_text(self, text: str, press_enter: bool = False) -> dict:
+        """Dictation: type into the focused window. The audit log keeps the length, never the text."""
+        if not text.strip():
+            return {"error": "Nothing to type."}
+        if len(text) > TYPE_MAX_CHARS:
+            return {"error": f"That is {len(text)} characters; the limit is {TYPE_MAX_CHARS}. Type it in parts."}
+        tool = self._typing_tool()
+        if tool is None:
+            return {"error": "No typing tool is installed. Tell the user to install wtype (Wayland) "
+                             "or xdotool (X11) with their package manager."}
+        build_type, enter = _TYPERS[tool]
+        argv_list = [build_type(text)] + ([enter] if press_enter in (True, "true", "True") else [])
+        for argv in argv_list:
+            proc = subprocess.run(argv, capture_output=True, text=True, timeout=30, stdin=subprocess.DEVNULL)
+            if proc.returncode != 0:
+                detail = (proc.stderr or proc.stdout or "").strip() or f"exit code {proc.returncode}"
+                audit(self._policy.log_path, "type_text", ShellResult(f"type_text [{len(text)} chars]",
+                                                                     proc.returncode, ""))
+                return {"error": f"{tool} failed: {detail}"}
+        audit(self._policy.log_path, "type_text", ShellResult(f"type_text [{len(text)} chars]", 0, ""))
+        return {"status": "typed", "characters": len(text), "with": tool}
 
     def play_music(self, query: str) -> dict:
         """YouTube in the default browser (set JARVIS_MUSIC_BROWSER to pick one); JARVIS_MUSIC_PLAYER=mpv for headless."""

@@ -24,7 +24,7 @@ def test_declarations_are_valid_gemini_function_declarations():
     declarations = function_declarations()
     assert [d.name for d in declarations] == [d["name"] for d in DECLARATIONS]
     assert {"run_shell", "open_app", "play_music", "media_control", "remember", "recall", "forget",
-            "end_conversation"} == {
+            "type_text", "end_conversation"} == {
         d.name for d in declarations}
 
 
@@ -196,3 +196,75 @@ def test_openai_tools_mirror_the_declarations_with_json_schema_types():
     assert ending == {"type": "object", "properties": {}}
     media = next(t for t in tools if t["function"]["name"] == "media_control")["function"]["parameters"]
     assert "play-pause" in media["properties"]["action"]["enum"]
+
+
+# -- type_text: dictation into whatever window has focus ---------------------------
+
+@pytest.fixture
+def typing(monkeypatch):
+    """Fake subprocess.run + which; returns the list of argv that were executed."""
+    calls = []
+
+    def fake_run(argv, **kwargs):
+        calls.append(argv)
+        return subprocess.CompletedProcess(argv, 0, "", "")
+
+    monkeypatch.setattr(tools_mod.subprocess, "run", fake_run)
+    monkeypatch.setattr(tools_mod.shutil, "which", lambda name: f"/usr/bin/{name}")
+    monkeypatch.setenv("XDG_SESSION_TYPE", "wayland")
+    return calls
+
+
+async def test_type_text_uses_wtype_on_wayland_without_a_shell(runner, typing):
+    result = await runner.call("type_text", {"text": "- hello; rm -rf ~ $(x)"})
+    assert result["status"] == "typed" and result["characters"] == 22
+    assert typing == [["wtype", "--", "- hello; rm -rf ~ $(x)"]]  # one argv element: never shell-parsed
+
+
+async def test_type_text_uses_xdotool_on_x11(runner, typing, monkeypatch):
+    monkeypatch.setenv("XDG_SESSION_TYPE", "x11")
+    monkeypatch.delenv("WAYLAND_DISPLAY", raising=False)
+    await runner.call("type_text", {"text": "salut"})
+    assert typing[0][:2] == ["xdotool", "type"] and typing[0][-1] == "salut"
+
+
+async def test_type_text_falls_back_to_ydotool(runner, typing, monkeypatch):
+    monkeypatch.setattr(tools_mod.shutil, "which", lambda name: "/usr/bin/ydotool" if name == "ydotool" else None)
+    await runner.call("type_text", {"text": "hi"})
+    assert typing == [["ydotool", "type", "--", "hi"]]
+
+
+async def test_type_text_can_press_enter_afterwards(runner, typing):
+    await runner.call("type_text", {"text": "ls", "press_enter": True})
+    assert typing == [["wtype", "--", "ls"], ["wtype", "-k", "Return"]]
+
+
+async def test_type_text_does_not_press_enter_by_default(runner, typing):
+    await runner.call("type_text", {"text": "ls"})
+    assert len(typing) == 1
+
+
+async def test_type_text_without_a_typing_tool_says_what_to_install(runner, typing, monkeypatch):
+    monkeypatch.setattr(tools_mod.shutil, "which", lambda name: None)
+    assert "wtype" in (await runner.call("type_text", {"text": "x"}))["error"]
+    assert typing == []
+
+
+@pytest.mark.parametrize("text", ["", "   ", "x" * 2001])
+async def test_type_text_rejects_empty_or_huge_input(runner, typing, text):
+    assert "error" in await runner.call("type_text", {"text": text})
+    assert typing == []
+
+
+async def test_type_text_reports_a_failing_typer(runner, monkeypatch):
+    monkeypatch.setattr(tools_mod.shutil, "which", lambda name: f"/usr/bin/{name}")
+    monkeypatch.setenv("XDG_SESSION_TYPE", "wayland")
+    monkeypatch.setattr(tools_mod.subprocess, "run",
+                        lambda argv, **kw: subprocess.CompletedProcess(argv, 1, "", "compositor does not support virtual keyboard"))
+    assert "virtual keyboard" in (await runner.call("type_text", {"text": "x"}))["error"]
+
+
+async def test_type_text_audit_log_records_length_never_the_text(runner, typing, policy):
+    await runner.call("type_text", {"text": "my secret passphrase"})
+    log = policy.log_path.read_text()
+    assert "type_text" in log and "20 chars" in log and "passphrase" not in log

@@ -1,84 +1,117 @@
-# Jarvis
+<p align="center">
+  <img src="docs/banner.svg" alt="Jarvis: talk to your Linux desktop" width="100%">
+</p>
 
-A voice assistant for Linux. Talk to your computer: ask questions, open apps, play music, run
-commands, keep notes, get a morning briefing. You choose where the thinking happens.
+When I was a kid I watched Tony Stark talk to his house and his suit, and it just worked. I wanted that
+setup. Not the suit, the part where you say what you want and the computer does it.
 
-| | **Local** (recommended) | **Gemini API** (testing only) |
-|---|---|---|
-| Speech to text | Whisper, on your machine | Google |
-| Language model | Any model in [Ollama](https://ollama.com) (or LM Studio, llama.cpp) | Gemini Live |
-| Voice | Piper, on your machine | Gemini voices |
-| What leaves your computer | **Nothing** | Your microphone audio, command output, memories, profile |
-| Setup | Ollama + about 2 GB of models | A free API key |
-| Use it for | Everyday use, private work | Trying it out, non-sensitive chats |
+It's now possible to build that on a normal PC, so I did.
 
-> **Status.** The Gemini backend is the one used day to day by the author. The local backend is
-> fully implemented and covered by unit tests with fake models, but it has had little time on real
-> hardware. Treat it as beta and please report what you find (`jarvis doctor` output helps).
+I know assistants like this already exist, and I'm not going to pretend this one is the answer to
+anything. How useful it really is can be debated. I built it because it's fun to have on my own machine,
+and because there are two things I end up using it for all the time:
 
-## Quick start
+- **Typing.** I type a lot, and sometimes my hands start to hurt. So I tell Jarvis what to write and it
+  types it into whatever window I'm in.
+- **Being lazy.** When I can't be bothered to search for something, I ask. "Open the browser", "what's
+  eating my RAM", "play some lo-fi".
 
-```bash
-git clone https://github.com/khalilammarr/jarvis-voice && cd jarvis-voice
-uv sync --extra local          # or --extra gemini, or --all-extras
-uv run jarvis setup            # guided: brain, language, voice, personality
-uv run jarvis doctor           # checks everything and tells you how to fix what's missing
-uv run jarvis                  # just talk
+That's the project. It's a hobby tool that I run at home, and I'm putting it up in case someone else
+wants the same thing.
+
+## How it works
+
+You talk, it listens, something thinks, it talks back and presses the buttons.
+
+```
+mic -> speech to text -> a language model -> text to speech -> speaker
+                              |
+              tools: run commands, open apps, play music,
+                     type for you, remember things
 ```
 
-For the local brain you also need Ollama running with a tool-capable model:
+The "something that thinks" is your choice. There are two options and you pick one during setup.
+
+**Gemini** is what I run. It's Google's Live API: you paste a free key and it works in a couple of
+minutes, and it sounds good. The catch is that your microphone audio, and anything Jarvis reads out
+for the model (command output, the notes about you, what you asked it to remember), goes to Google,
+and free keys may be used to train their models. I use it for things I'd be fine saying out loud
+in a café.
+
+**Local** keeps everything on your machine: Whisper for listening, a model running in
+[Ollama](https://ollama.com) for thinking, Piper for the voice. Nothing leaves. If you're going to use
+this for real work, use this one. I'll be straight about it: I wrote it and it has unit tests, but I
+haven't run it on my own computer, because I use Gemini. If you try it and something breaks, please open
+an issue with the output of `jarvis doctor`.
+
+## Install
+
+You need Python 3.11 or 3.12, PortAudio (`portaudio` on Arch, `libportaudio2` on Debian and Ubuntu),
+and PipeWire or PulseAudio for sound.
+
+```bash
+git clone https://github.com/khalilammarr/jarvis-voice
+cd jarvis-voice
+uv sync --extra gemini        # or --extra local, or --all-extras
+uv run jarvis setup           # a few questions, see below
+uv run jarvis doctor          # checks your install and tells you how to fix what's missing
+uv run jarvis                 # then just talk
+```
+
+For the local brain, also run an Ollama server with a model that can call tools:
 
 ```bash
 ollama pull llama3.2:3b
 ```
 
-You need Python 3.11 or 3.12, PortAudio (`libportaudio2` / `portaudio`), and a working
-PipeWire or PulseAudio setup.
+### Setup
 
-## The setup wizard
+`jarvis setup` asks which brain to use, which language Jarvis should speak (auto, English, French,
+Arabic, Spanish, German, Italian, Portuguese, Dutch, Russian, Turkish or Chinese), what personality it
+should have (casual with a bit of banter, friendly, or short and to the point), which voice, and whether
+to wait for a wake word or just listen. It writes `~/.config/jarvis/config.toml`. Run it again whenever
+you change your mind. If you use Gemini, `jarvis --voices` plays every voice so you can pick one.
 
-`jarvis setup` asks five things and writes `~/.config/jarvis/config.toml`. Run it again any time.
+## Typing for you
 
-1. **Brain.** Local or Gemini, with the privacy trade-off spelled out.
-2. **Language.** Auto, English, French, Arabic, Spanish, German, Italian, Portuguese, Dutch,
-   Russian, Turkish or Chinese. It sets the language Jarvis speaks and what Whisper listens for.
-3. **Personality.** `sidekick` (casual, a bit of banter), `friendly` (warm, patient) or
-   `concise` (short answers, no small talk).
-4. **Voice.** Local: the Piper voice for your language is downloaded for you. Gemini: pick a
-   voice by name, or audition all of them with `jarvis --voices`.
-5. **Behaviour.** Wake word or always listening, and the daily briefing.
+This is the part I use most. Say something like:
 
-The reference for every setting is in [docs/configuration.md](docs/configuration.md).
+- "type: I'll be there at six, don't wait for me"
+- "write a reply saying thanks, I'll look at it tonight"
+- "type git status and press enter"
 
-## What it can do
+Jarvis types the text into whatever window has focus, as if you'd typed it. It only presses Enter when
+you ask it to. It needs a tool that can send keystrokes:
 
+```bash
+sudo pacman -S wtype          # Hyprland, Sway and other wlroots compositors
+sudo pacman -S xdotool        # X11
+sudo pacman -S ydotool        # anything else (GNOME on Wayland, for example)
 ```
-mic -> speech to text -> language model -> text to speech -> speaker
-                              | tool calls
-   run_shell · open_app · play_music · media_control · remember / recall / forget
-```
 
-Say things like "open the browser", "what's using the most memory", "play some lo-fi",
-"remember that the dentist is on the 12th", "pause the music", "goodbye".
+The audit log records how many characters were typed, never the text, since you might be typing a
+password.
 
-## Safety
+## What else it does
 
-Jarvis can run **any** shell command as you. That is the point, and it is also the risk.
-Read [docs/privacy-and-safety.md](docs/privacy-and-safety.md) before you use it. In short:
+- Runs shell commands, launches apps, plays music from YouTube, controls whatever is playing.
+- Remembers things you tell it, in a plain text file you can edit (`~/.local/share/jarvis/memory.md`).
+- Reads a short note about you (`~/.config/jarvis/me.md`) so it knows your city, your habits and what you do.
+- Gives a quick briefing the first time you talk to it each day.
+- On Hyprland it can tell how long you've spent in each app. Only the app name is stored, never window titles.
+- Says goodbye when you do, and turns itself off.
 
-* Every command is written to an audit log (output is never logged).
-* A guard refuses unrecoverable commands (`rm -rf /`, `mkfs`, `dd` onto a disk, fork bombs).
-* A path filter refuses commands that touch SSH keys, cloud credentials, browser profiles and
-  `.env` files, and secret-looking strings are scrubbed from output. You can add your own paths.
-* The prompt makes Jarvis announce destructive actions and wait for a spoken "yes".
+## Be careful with it
 
-None of this is a sandbox. Speech recognition mishears, and language models make mistakes.
+Jarvis can run any command as you. That's what makes it useful and it's also the risk, so read
+[docs/privacy-and-safety.md](docs/privacy-and-safety.md) before you leave it running. There's an audit
+log, a guard that refuses things like `rm -rf /`, a filter that keeps it away from your SSH keys, cloud
+credentials and browser profiles, and the prompt makes it say what it's about to do before anything
+destructive. None of that is a sandbox. Speech recognition mishears and models get things wrong.
 
 ## More
 
-* [Backends: local vs Gemini](docs/backends.md)
-* [Configuration reference](docs/configuration.md)
-* [Privacy and safety](docs/privacy-and-safety.md)
-* [Desktop integration: systemd, Hyprland, Omarchy bar widget](docs/desktop-integration.md)
-* [Troubleshooting](docs/troubleshooting.md)
-* [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [MIT license](LICENSE)
+[Backends](docs/backends.md) · [Configuration](docs/configuration.md) ·
+[Privacy and safety](docs/privacy-and-safety.md) · [Desktop integration](docs/desktop-integration.md)
+(systemd service, keyboard shortcut, a bar widget for Omarchy) · [Troubleshooting](docs/troubleshooting.md) ·
+[Contributing](CONTRIBUTING.md) · [MIT license](LICENSE)

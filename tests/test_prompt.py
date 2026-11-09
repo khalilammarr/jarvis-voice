@@ -83,3 +83,8 @@ def test_hyprland_hints_only_appear_on_hyprland():
     assert "hyprctl" in system_instruction(google_search=False, user="a", desktop="Hyprland")
     assert "hyprctl" not in system_instruction(google_search=False, user="a", desktop="GNOME")
     assert "Omarchy" not in system_instruction(google_search=False, user="a", desktop="Hyprland")
+
+
+def test_dictation_tool_is_explained_to_the_model():
+    text = system_instruction(google_search=False, user="alex")
+    assert "type_text" in text and "Enter only if" in text

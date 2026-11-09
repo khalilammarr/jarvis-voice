@@ -27,6 +27,13 @@ Jarvis can run any command as you. Layers around it, none of which is a sandbox:
 Speech recognition mishears and models misjudge. The guard is a seatbelt, not a vault.
 If you work with confidential material, add those directories to `deny_paths`.
 
+## Typing for you
+
+`type_text` sends keystrokes to whatever window has focus. The text is passed to `wtype`, `xdotool` or
+`ydotool` as a single argument, never through a shell, and Enter is pressed only when asked. The audit
+log records the number of characters, not the text. With the Gemini backend the words you dictate are
+heard by Google like everything else you say.
+
 ## Memory and activity
 
 `remember` refuses secret-looking facts. Day tracking records only the focused window **class**
