@@ -1,0 +1,10 @@
+#!/bin/bash
+# Turn Jarvis on or off. Bound to Super+Ctrl+J in ~/.config/hypr/bindings.lua.
+unit=jarvis.service
+if systemctl --user is-active --quiet "$unit"; then
+  systemctl --user stop "$unit"
+  notify-send -a Jarvis -t 1500 Jarvis "Off" 2>/dev/null
+else
+  notify-send -a Jarvis -t 1500 Jarvis "Starting…" 2>/dev/null
+  systemctl --user start "$unit"
+fi

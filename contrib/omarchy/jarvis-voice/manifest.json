@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "jarvis-voice.jarvis",
+  "name": "Jarvis",
+  "version": "1.0.0",
+  "author": "jarvis-voice contributors",
+  "description": "Start, stop and wake the Jarvis voice assistant (systemd --user jarvis.service)",
+  "kinds": ["bar-widget"],
+  "entryPoints": { "barWidget": "BarWidget.qml" },
+  "barWidget": {
+    "displayName": "Jarvis",
+    "description": "Voice assistant status and toggle",
+    "category": "System",
+    "defaultSection": "right",
+    "allowMultiple": false
+  }
+}

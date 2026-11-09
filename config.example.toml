@@ -1,0 +1,31 @@
+# Copy to ~/.config/jarvis/config.toml, or let `jarvis setup` write it for you.
+# Every key can also be set as an environment variable (JARVIS_<NAME>, see docs/configuration.md);
+# environment variables win over this file.
+
+[general]
+backend  = "local"      # "local" (private, recommended) or "gemini" (Google API, testing only)
+language = "auto"       # auto | en | fr | ar | es | de | it | pt | nl | ru | tr | zh
+persona  = "sidekick"   # sidekick | friendly | concise
+wake_word = false       # true: say "hey jarvis" first. false: always listening
+briefing  = true        # a short briefing the first time you talk each day
+# day_tracking = true   # Hyprland only: time per focused app (window class, never titles)
+
+[audio]
+# input_device  = "Mic"   # index or name fragment, see `jarvis --devices`
+# output_device = ""
+barge_in = false        # true: you can interrupt Jarvis. Use headphones or echo cancellation
+
+[local]                 # used when backend = "local"
+llm_url   = "http://127.0.0.1:11434/v1"   # Ollama; LM Studio / llama.cpp servers work too
+llm_model = "llama3.2:3b"                 # must support tool calling
+stt_model = "small"                       # Whisper size: tiny | base | small | medium
+stt_device = "auto"                       # auto | cpu | cuda
+# tts_voice = ""                          # a Piper voice; empty = default for your language
+
+[gemini]                # used when backend = "gemini". The API key lives in secrets.env, not here.
+voice = "Charon"        # hear them all with `jarvis --voices`
+google_search = true
+
+[safety]
+guard = true            # refuse unrecoverable commands (rm -rf /, mkfs, ...)
+# deny_paths = ["~/work/confidential"]    # extra places Jarvis may never touch

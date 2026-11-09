@@ -1,0 +1,20 @@
+[Unit]
+Description=Jarvis voice assistant
+After=pipewire.service pipewire-pulse.service graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+# The installed entry point directly (not `uv run`), so Jarvis is the main PID and gets
+# SIGUSR1 ("talk now", sent by the bar widget) and SIGTERM itself.
+# Install with `uv tool install .[local]` (or pipx) so the binary is at ~/.local/bin/jarvis.
+ExecStart=%h/.local/bin/jarvis
+Environment=PYTHONUNBUFFERED=1
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=10
+# Apps Jarvis opens (Brave, kitty...) live in this unit's cgroup. Only stop Jarvis itself,
+# so clicking "stop" in the bar doesn't also close your browser. Jarvis stops its own mpv.
+KillMode=process
+
+[Install]
+WantedBy=graphical-session.target
