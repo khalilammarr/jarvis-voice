@@ -19,6 +19,12 @@ and because there are two things I end up using it for all the time:
 That's the project. It's a hobby tool that I run at home, and I'm putting it up in case someone else
 wants the same thing.
 
+## Not finished
+
+This is a work in progress and I change it often. Commands, config keys and file locations can move
+between commits, things will break, and a few parts are only half built. There are no releases yet. If
+you want something stable, pin a commit; if you pull the latest, skim the commit log first.
+
 ## How it works
 
 You talk, it listens, something thinks, it talks back and presses the buttons.
@@ -74,7 +80,7 @@ you change your mind. If you use Gemini, `jarvis --voices` plays every voice so 
 
 ## Typing for you
 
-This is the part I use most. Say something like:
+This one is new and still rough. Say something like:
 
 - "type: I'll be there at six, don't wait for me"
 - "write a reply saying thanks, I'll look at it tonight"
@@ -100,6 +106,43 @@ password.
 - Gives a quick briefing the first time you talk to it each day.
 - On Hyprland it can tell how long you've spent in each app. Only the app name is stored, never window titles.
 - Says goodbye when you do, and turns itself off.
+
+## Where it's going
+
+Ticked means it exists today. The empty boxes are things I want to build, roughly in the order I'd
+get to them. The list will change.
+
+- [x] Talk to your desktop and hear it answer (Gemini Live)
+- [x] Run commands, open apps, play music, control what's playing
+- [x] Type for you, into whatever window has focus
+- [x] Memory: it remembers what you tell it, in a plain text file you can edit
+- [x] Daily briefing, three personalities, 12 languages, a setup wizard, `jarvis doctor`
+- [ ] A fully local brain. The code is written and tested with fake models, but it hasn't run on real
+  hardware yet, so I'm not ticking it.
+
+Not built yet:
+
+- [ ] **Skills.** Small add-on abilities kept as plain files, like "set up my work desktop" or
+  "summarise what's on my clipboard", that Jarvis can pick up without me touching the core.
+- [ ] **Screen reading.** Grab a screenshot, run character recognition on it, and let you say "what does
+  this error say?" or "read me that email". Useful when the text can't be copied.
+- [ ] **Better memory.** Searchable, grouped by topic, able to answer "what was I doing yesterday?",
+  and easy to prune. Today it's a flat list of facts.
+- [ ] **Agents.** Helpers that keep working after you stop talking: "tell me when this download
+  finishes", "watch the build and speak up if it fails", a research mode that goes off, reads a few
+  pages and reports back.
+- [ ] **A real dictation mode.** Say "dictation on" and everything you say is typed word for word,
+  with no model in the loop, until you say "dictation off". Faster, and nothing leaves the machine.
+- [ ] **Local speech detection** so silence is never streamed anywhere, plus a mute hotkey.
+- [ ] Setup guides for GNOME and KDE, not only Hyprland.
+
+## Inspiration
+
+[OpenJarvis](https://github.com/open-jarvis/OpenJarvis), from Stanford's Hazy Research and Scaling
+Intelligence Lab, is a much bigger and more serious take on local-first personal AI, with skills,
+agents and ready-made presets. Seeing how they separate skills from agents is what got me thinking
+about the list above. I didn't copy any code or text from it. If you want a research-grade framework
+rather than a hobby project that talks to one person's desktop, go there.
 
 ## Be careful with it
 
